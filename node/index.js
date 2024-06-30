@@ -1,28 +1,42 @@
-const http = require('http');
-const path = require('path');
-const fs = require('fs');
+const http=require('http');
+const fs=require('fs');
+// const path= require('path')
 
 
-const port = process.env.PORT || 8080; // Use environment variable or default to 8080
 
-const server = http.createServer((req, res) => {
-  const url = req.url; // Get the requested URL
-  const filePath = path.join(__dirname, 'public', url === '/' ? 'index.html' : url); // Construct file path based on URL
+const server = http.createServer((req,res) => {
+  let path = './public/'
+  switch(req.url){
+    case '/':
+      path+='index.html';
+      break;
+    case '/about':
+      path+='about.html';
+      break;
+    case '/contactme':
+      path+='contactme.html';
+      break;
+    default:
+      path+='404.html';
+      break;
+  }
+  console.log(req.url , req.method);
+  res.setHeader('content-type', 'text/html')
+  fs.readFile(path, (err,data)=>{
+    if(err){
+      console.log(err);
+      res.end();    
 
-  // Check if file exists
-fs.access(filePath, fs.constants.F_OK, (err) => {
-    if (err) {
-      // File not found, serve 404
-    res.writeHead(404, { 'Content-Type': 'text/html' });
-    res.end('<h1>Page Not Found</h1>');
-    } else {
-      // File found, serve the requested file
-    res.writeHead(200);
-    fs.createReadStream(filePath).pipe(res);
+    }else {
+      res.write(data);
+      res.end();
     }
-});
-});
+  
+  } )
+  
+}
+)
+server.listen(8080, () =>{
+  console.log('the port listen on port 8080')
 
-server.listen(port, () => {
-console.log(`Server is listening on port ${port}`);
-});
+})
